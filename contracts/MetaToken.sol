@@ -1,17 +1,44 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "erc721a/contracts/ERC721A.sol";
 
-contract MetaToken is ERC20, Ownable {
-    constructor() ERC20("MetaToken", "MTA") {}
+contract Dinar is ERC721A {
+    address public owner;
 
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
+    uint256 public maxLimit = 5;
+
+    string baseUrl =
+        "https://bronze-wooden-aardvark-881.mypinata.cloud/ipfs/Qmf4MNSp6aJ3N1FPbLVms6vcsdjgUPJ9Wv71VT3qUs3RSn";
+
+    string public prompt = "A Under-water world Portait, A Creative Futuristic World, A Majestic Peacock";
+
+    constructor() ERC721A("Dinar", "DNR") {
+        owner = msg.sender;
     }
 
-    function decimals() public pure override returns (uint8) {
-		return 0;
-	}
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Can be performed by the owner only.");
+        _;
+    }
+
+    function mint(uint256 quantity) external payable onlyOwner {
+        require(
+            totalSupply() + quantity <= maxLimit,
+            "You can not mint more than 5 NFTs"
+        );
+        _mint(msg.sender, quantity);
+    }
+
+    function getBalance(address _owner) external view returns (uint256) {
+        return balanceOf(_owner);
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseUrl;
+    }
+
+    function promptDescription() external view returns (string memory) {
+        return prompt;
+    }
 }
